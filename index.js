@@ -1,3 +1,4 @@
+import { pipe } from "ramda";
 (async () => {
   const chanceTablePerLevel = [
     [1, 0, 0, 0, 0],
@@ -204,7 +205,7 @@
     level: 9,
   };
 
-  const countChampionsOnBoard = (aBoard, aChampionList) =>
+  const countChampionsOnBoard = (aChampionList) => (aBoard) =>
     aChampionList.map((aChampion) => ({
       ...aChampion,
       qtyOnBoard: aBoard.reduce(
@@ -215,7 +216,15 @@
       ),
     }));
 
-  console.log(countChampionsOnBoard(board, campions));
+  const calculateCurrentPool = (aPool) => (aChampionList) =>
+    aChampionList.map((aChampion) => ({
+      ...aChampion,
+      currentPool: aPool[aChampion.cost - 1].qty - aChampion.qtyOnBoard,
+    }));
+
+  console.log(
+    pipe(countChampionsOnBoard(campions), calculateCurrentPool(pool))(board),
+  );
 
   // const calculateBlindRowChance = (
   //   myBoard,
