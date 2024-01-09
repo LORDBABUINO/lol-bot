@@ -12,6 +12,20 @@
     [0, 0, 0, 0.3, 0.7],
   ];
 
+  // Possible chance table
+
+  // [1.0, 0, 0, 0, 0],
+  // [1.0, 0, 0, 0, 0],
+  // [0.75, 0.25, 0, 0, 0],
+  // [0.55, 0.3, 0.15, 0, 0],
+  // [0.45, 0.33, 0.2, 0],
+  // [0.25, 0.4, 0.3, 0.05, 0],
+  // [0.19, 0.3, 0.35, 0.15, 0.01],
+  // [0.16, 0.2, 0.35, 0.25, 0.04],
+  // [0.09, 0.15, 0.3, 0.3, 0.16],
+  // [0.05, 0.1, 0.2, 40, 0.25],
+  // [0.01, 0.02, 0.12, 0.5, 0.35],
+
   const pool = [
     { qty: 13, pool: 22 },
     { qty: 13, pool: 20 },
@@ -190,48 +204,61 @@
     level: 9,
   };
 
-  const calculateBlindRowChance = (
-    myBoard,
-    myBuild,
-    championList,
-    myPool,
-    chanceTable,
-    me,
-  ) =>
-    myBuild.map((name) => {
-      const championCost = championList.find(
-        (aChampion) => aChampion.name === name,
-      ).cost;
-      const chance = chanceTable[me.level - 1][championCost - 1];
-      const totalPool = chanceTable[me.level - 1].reduce(
-        (total, aChance, index) =>
-          aChance > 0 ? total + myPool[index].qty * myPool[index].pool : total,
-        0,
-      );
-      const currentQty = myBoard.reduce(
-        (total, aBoard) =>
+  const countChampionsOnBoard = (aBoard, aChampionList) =>
+    aChampionList.map((aChampion) => ({
+      ...aChampion,
+      qtyOnBoard: aBoard.reduce(
+        (total, aSquare) =>
           total +
-          (aBoard.some((aChampion) => aChampion.name === name)
-            ? aBoard.find((aChampion) => aChampion.name === name).qty
-            : 0),
+          (aSquare.find(({ name }) => name === aChampion.name)?.qty ?? 0),
         0,
-      );
-      return {
-        name,
-        chance,
-        totalPool,
-        currentQty,
-        currentChance: ((totalPool - currentQty) / totalPool) * chance,
-      };
-    });
-  console.log(
-    calculateBlindRowChance(
-      board,
-      build,
-      pool,
-      campions,
-      chanceTablePerLevel,
-      player,
-    ),
-  );
+      ),
+    }));
+
+  console.log(countChampionsOnBoard(board, campions));
+
+  // const calculateBlindRowChance = (
+  //   myBoard,
+  //   myBuild,
+  //   championList,
+  //   myPool,
+  //   chanceTable,
+  //   me,
+  // ) =>
+  //   myBuild.map((name) => {
+  //     const championCost = championList.find(
+  //       (aChampion) => aChampion.name === name,
+  //     ).cost;
+  //     const chance = chanceTable[me.level - 1][championCost - 1];
+  //     const totalPool = chanceTable[me.level - 1].reduce(
+  //       (total, aChance, index) =>
+  //         aChance > 0 ? total + myPool[index].qty * myPool[index].pool : total,
+  //       0,
+  //     );
+  //     const currentQty = myBoard.reduce(
+  //       (total, aBoard) =>
+  //         total +
+  //         (aBoard.some((aChampion) => aChampion.name === name)
+  //           ? aBoard.find((aChampion) => aChampion.name === name).qty
+  //           : 0),
+  //       0,
+  //     );
+  //     return {
+  //       name,
+  //       chance,
+  //       totalPool,
+  //       currentQty,
+  //       currentChance: ((totalPool - currentQty) / totalPool) * chance,
+  //     };
+  //   });
+  // console.log(
+  //   calculateBlindRowChance(
+  //     board,
+  //     build,
+  //     pool,
+  //     campions,
+  //     chanceTablePerLevel,
+  //     player,
+  //   ),
+  // );
 })();
