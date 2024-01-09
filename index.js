@@ -1,4 +1,4 @@
-import { pipe } from "ramda";
+import { pipe, map } from "ramda";
 (async () => {
   const chanceTablePerLevel = [
     [1, 0, 0, 0, 0],
@@ -205,25 +205,34 @@ import { pipe } from "ramda";
     level: 9,
   };
 
-  const countChampionsOnBoard = (aChampionList) => (aBoard) =>
-    aChampionList.map((aChampion) => ({
-      ...aChampion,
-      qtyOnBoard: aBoard.reduce(
-        (total, aSquare) =>
-          total +
-          (aSquare.find(({ name }) => name === aChampion.name)?.qty ?? 0),
-        0,
-      ),
-    }));
+  const countChampionsOnBoard = (aBoard) => (aChampion) => ({
+    ...aChampion,
+    qtyOnBoard: aBoard.reduce(
+      (total, aSquare) =>
+        total + (aSquare.find(({ name }) => name === aChampion.name)?.qty ?? 0),
+      0,
+    ),
+  });
 
-  const calculateCurrentPool = (aPool) => (aChampionList) =>
-    aChampionList.map((aChampion) => ({
+  const calculateCurrentPool = (aPool) => (aChampion) => ({
+    ...aChampion,
+    currentPool: aPool[aChampion.cost - 1].qty - aChampion.qtyOnBoard,
+  });
+
+  const aggregateChampionLevelModifier =
+    (level) => (chanceTable) => (aChampion) => ({
       ...aChampion,
-      currentPool: aPool[aChampion.cost - 1].qty - aChampion.qtyOnBoard,
-    }));
+      levelModifier: chanceTable[level - 1][aChampion.cost - 1],
+    });
 
   console.log(
-    pipe(countChampionsOnBoard(campions), calculateCurrentPool(pool))(board),
+    map(
+      pipe(
+        countChampionsOnBoard(board),
+        calculateCurrentPool(pool),
+        aggregateChampionLevelModifier(player.level)(chanceTablePerLevel),
+      ),
+    )(campions),
   );
 
   // const calculateBlindRowChance = (
