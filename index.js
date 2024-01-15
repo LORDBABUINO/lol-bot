@@ -174,15 +174,48 @@ import { pipe, map, chain } from "ramda";
     // ],
   ];
 
-  const build = [
-    "Ahri",
-    "Akali K/DA",
-    "Ekko",
-    "Neeko",
-    "Seraphine",
-    "Kaisa",
-    "Kennen",
-    "Lillia",
+  const comps = [
+    [
+      "Akali K/DA",
+      "Karthus",
+      "Viego",
+      "Mordekaiser",
+      "Yorick",
+      "Neeko",
+      "Gnar",
+      "Lillia",
+    ],
+    [
+      "Ahri",
+      "Akali K/DA",
+      "Ekko",
+      "Neeko",
+      "Seraphine",
+      "Kaisa",
+      "Kennen",
+      "Lillia",
+    ],
+    [
+      "Blitzcrank",
+      "Twisted Fate",
+      "Sona",
+      "Ziggs",
+      "Illaoi",
+      "Lux",
+      "Gragas",
+      "Nami",
+    ],
+    [
+      "Riven",
+      "Yone",
+      "Caitlyn",
+      "Viego",
+      "Mordekaiser",
+      "Kayn",
+      "Garen",
+      "Kayle",
+    ],
+    ["Amumu", "Vex", "Twitch", "Poppy", "Amumu", "Vex", "Pantheon", "Twitch"],
   ];
 
   const player = {
@@ -248,12 +281,30 @@ import { pipe, map, chain } from "ramda";
     championList: sheet.championList.sort(
       (a, b) => b.chance - a.chance || b.cost - a.cost,
     ),
+    comps: sheet.comps.sort((a, b) => b.chance - a.chance || b.cost - a.cost),
+  });
+
+  const calculateCompChance = (compList) => (sheet) => ({
+    ...sheet,
+    comps: compList.map((comp) => ({
+      champions: comp,
+      chance:
+        1 -
+        [...new Set(comp)].reduce(
+          (chance, champion) =>
+            chance *
+            (1 -
+              sheet.championList.find(({ name }) => name === champion).chance),
+          1,
+        ),
+    })),
   });
 
   console.log(
     pipe(
       chain(createSheet, calcutateTotalPosibleChampions),
       putChanceOnSheet,
+      calculateCompChance(comps),
       sortByChance,
     )(
       map(
